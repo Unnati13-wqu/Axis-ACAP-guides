@@ -8,12 +8,9 @@
 
 /* This struct defines the content of the todo API that we are getting data from
  */
-typedef struct todo_item {
-  int user_id;
-  int id;
-  GString *title;
-  bool completed;
-} todo_item_t;
+typedef struct cat_fact {
+  GString *fact;
+} cat_fact_t;
 
 /*
  * This function is called by libcurl when it has data to write and
@@ -74,7 +71,7 @@ end:
  *     "completed": <BOOL>
  * }
  */
-todo_item_t parse_item(GString *content) {
+cat_fact_t parse_item(GString *content) {
   todo_item_t item = {0};
   GError *error = NULL;
   JsonReader *reader = NULL;
@@ -139,24 +136,23 @@ end:
 static void get_and_print_json() {
   // Get the json data from the web API
   GString *json_string =
-      web_get_json_data("https://jsonplaceholder.typicode.com/todos/1");
+      web_get_json_data("https://catfact.ninja/fact");
   if (json_string == NULL) {
     fapp_logger_log(LOG_ERR, "Failed to get json data");
     return;
   }
 
   // Parse the json data to a struct
-  todo_item_t item = parse_item(json_string);
+  cat_fact_t item = parse_item(json_string);
 
   // Print the data
-  fapp_logger_log(LOG_INFO, "Parsed API data for todo-list:");
-  fapp_logger_log(LOG_INFO, "* Item title: %s", item.title->str);
-  fapp_logger_log(LOG_INFO, "  - Created by user ID: %d", item.user_id);
-  fapp_logger_log(LOG_INFO, "  - Item ID: %d", item.id);
-  fapp_logger_log(LOG_INFO, "  - Completed: %s", item.completed ? "yes" : "no");
+  cat_fact_t fact_item = parse_item(json_string);
 
-  g_string_free(item.title, TRUE);
-  g_string_free(json_string, TRUE);
+if (fact_item.fact != NULL) {
+  fapp_logger_log(LOG_INFO, "Cat Fact: %s", fact_item.fact->str);
+  g_string_free(fact_item.fact, TRUE);
+} else {
+  fapp_logger_log(LOG_ERR, "Failed to parse a valid fact");
 }
 
 int main(int argc, char **argv) {
